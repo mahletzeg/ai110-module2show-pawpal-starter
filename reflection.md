@@ -7,10 +7,27 @@
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
+**Core User Actions**
+
+1. **Add a pet care task** – Create a care task (walk, feeding, medication, grooming) with duration and priority.
+2. **Generate a daily care plan** – Produce an optimized schedule based on available time windows, task priority, and preferences, with reasoning for why tasks were ordered that way.
+3. **Enter pet and owner information** – Input owner details (name, availability) and pet details (name, category, special needs) so the planner can personalize recommendations.
+4. **Authenticate / manage account** – Register and log in so pet profiles, task history, and schedules persist across sessions.
+
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+
+My design evolved during implementation. Here are the key changes:
+
+- **Added task completion tracking to "Task"**: Initially, "Task" only represented care activities to schedule, so I added "completed: bool" and "completed_at: datetime" fields, plus a "mark_complete()" method to support task history and persistence across sessions. Pet owners need to track which tasks were actually completed, not just scheduled. This enables future features like habit tracking and performance analytics.
+
+- **Added "care_plans" to "User"**: Originally, "DailyCarePlan" existed independently without a direct link to users, so I added a "care_plans: List[DailyCarePlan]" collection and "add_care_plan()" method to "User" to make sure that users can access their historical schedules and generate plans.
+
+- **Added "pets" to "DailyCarePlan"**: "DailyCarePlan" originally only contained "scheduled_tasks", so I added "pets: List[Pet]" to explicitly track which pets are included in each plan
+
+- **Introduced "CarePlanScheduler" class**: Originally, scheduling logic was missing and only data structures existed, so I created a new class responsible for generating plans and detecting conflicts.
 
 ---
 

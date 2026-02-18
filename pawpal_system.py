@@ -34,6 +34,12 @@ class Task:
     pet_id: str
     created_by: str  # user_id
     created_at: datetime = field(default_factory=datetime.now)
+    completed: bool = False
+    completed_at: datetime = None
+    
+    def mark_complete(self) -> None:
+        self.completed = True
+        self.completed_at = datetime.now()
     
     def get_task_details(self) -> dict:
         return {
@@ -61,6 +67,7 @@ class DailyCarePlan:
     date: datetime
     owner_id: str
     scheduled_tasks: List[ScheduledTask] = field(default_factory=list)
+    pets: List[Pet] = field(default_factory=list)
     
     def add_scheduled_task(self, scheduled_task: ScheduledTask) -> None:
         self.scheduled_tasks.append(scheduled_task)
@@ -79,6 +86,10 @@ class User:
     availability: List[TimeWindow] = field(default_factory=list)
     pets: List[Pet] = field(default_factory=list)
     tasks: List[Task] = field(default_factory=list)
+    care_plans: List[DailyCarePlan] = field(default_factory=list)
+    
+    def add_care_plan(self, plan: DailyCarePlan) -> None:
+        self.care_plans.append(plan)
     
     def get_availability(self) -> List[TimeWindow]:
         return self.availability
@@ -88,3 +99,14 @@ class User:
     
     def add_task(self, task: Task) -> None:
         self.tasks.append(task)
+
+# New class for scheduling logic
+@dataclass
+class CarePlanScheduler:
+    def generate_daily_plan(self, user: User, date: datetime) -> DailyCarePlan:
+        """Generate optimized schedule based on user availability and task priority"""
+        pass
+    
+    def has_time_conflict(self, scheduled_task: ScheduledTask, plan: DailyCarePlan) -> bool:
+        """Check if new task overlaps with existing ones"""
+        pass

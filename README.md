@@ -52,3 +52,22 @@ pip install -r requirements.txt
 5. Add tests to verify key behaviors.
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
+
+## Testing PawPal+
+
+To verify the reliability and correctness of the PawPal+ scheduling system, run the test suite using:
+
+```bash
+python -m pytest
+```
+
+What the tests cover:
+
+- **Sorting correctness**: Ensures tasks are returned in chronological order.
+- **Recurrence logic**: Confirms that marking a daily task complete creates a new task for the following day.
+- **Conflict detection**: Verifies that the scheduler flags duplicate or overlapping times.
+- **Task completion and addition**: Checks that tasks can be marked complete and added to pets correctly.
+
+**Confidence Level based on reliability**: 4/5 stars
+
+The system passes all core scheduling, recurrence, and conflict detection tests. Most typical and edge cases are covered, but further testing may be needed for highly complex scenarios or unusual user inputs.

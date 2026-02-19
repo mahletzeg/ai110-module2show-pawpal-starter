@@ -53,6 +53,21 @@ pip install -r requirements.txt
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
 
+## Features
+
+- **Sorting**: Scheduler.organize_tasks() sorts tasks by priority (high→low), then by scheduled_time, then created_at (uses Python sorted, O(n log n)).
+- **Greedy scheduling**: Scheduler.schedule_tasks() fills Owner.availability windows sequentially, placing tasks in the earliest available slot that fits.
+- **Conflict detection (warnings)**: Scheduler.has_time_conflict() checks scheduled-slot overlaps and prevents double-booking; conflicts are avoided/flagged rather than crashing.
+- **Task completion tracking**: Task stores completed and completed_at; mark_complete() updates state for history and recurrence handling.
+- **Recurrence support**: Task.next_occurrence() supports simple daily and weekly recurrence rules to compute the next occurrence.
+- **Input validation**: Task.validate() enforces sensible duration and priority values and required fields.
+- **Per-pet task ownership**: Pet holds a tasks: List[Task] with add_task() / remove_task() for clear ownership and lookup.
+- **Owner aggregation**: Owner.get_all_tasks() collects tasks across pets for scheduling as a single work set.
+- **Plan container**: DailyCarePlan is a self-contained result (contains ScheduledTask entries and referenced Pets) with get_reasoning_for_order().
+- **Serialization / UI-friendly summaries**: Task.to_dict() and Task.get_summary() provide stable representations for UI and export.
+- **Session persistence (UI)**: app.py stores the Owner instance in st.session_state so pets/tasks persist across Streamlit reruns.
+- **Complexity notes**: sorting is O(n log n); the greedy scheduler and per-check conflict tests can be up to O(n \* w) or O(n^2) in worst case (n tasks, w windows), so consider a specialized solver for large-scale scheduling.
+
 ## Testing PawPal+
 
 To verify the reliability and correctness of the PawPal+ scheduling system, run the test suite using:

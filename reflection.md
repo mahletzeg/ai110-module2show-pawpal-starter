@@ -38,6 +38,16 @@ My design evolved during implementation. Here are the key changes:
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
 - How did you decide which constraints mattered most?
 
+The scheduler considers these constraints in order of importance:
+
+- **Owner availability (TimeWindow)**: tasks must fit within available windows.
+- **Task duration**: a task must fit the remaining time in a window.
+- **Task priority**: higher priority tasks are placed before lower priority ones.
+- **Scheduled_time (if set)**: tasks with explicit scheduled times are respected when possible.
+- **Recurrence and completion state**: recurring tasks are rescheduled only if due and uncompleted.
+
+Decision rationale: availability and duration are hard constraints (a task cannot occur outside available time), so they are enforced first. Priority and scheduled_time guide ordering within feasible slots to produce useful, explainable plans for typical daily workloads.
+
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
@@ -68,10 +78,26 @@ For larger or more complex scenarios, consider local-search improvements
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
 - What kinds of prompts or questions were most helpful?
 
+AI was used for:
+
+- Rapid design iteration (UML/mermaid diagrams and class responsibilities).
+- Scaffolding dataclasses and method signatures.
+- Implementing and refactoring scheduler logic and helpers.
+- Generating unit test skeletons and simple test cases.
+- Drafting Streamlit session_state usage and small UI snippets.
+  Helpful prompts included requests for: dataclass implementations, scheduling algorithm examples, conflict-detection helpers, Streamlit state patterns, and concise documentation.
+
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
 - How did you evaluate or verify what the AI suggested?
+
+AI suggested implementing ScheduledTask with time only start_time and end_time fields. I initially accepted this but later realized it creates ambiguity for same day scheduling and breaks for multi day or overnight tasks. I evaluated this by:
+
+1. Writing a test case that scheduled tasks across a day boundary.
+2. Observing the logic fail silently (times were compared without dates).
+3. Documenting the limitation in code comments and the reflection.
+4. Deciding to defer a fix to a future iteration since the current Streamlit UI only handles single day scheduling.
 
 ---
 
@@ -82,10 +108,28 @@ For larger or more complex scenarios, consider local-search improvements
 - What behaviors did you test?
 - Why were these tests important?
 
+Implemented unit tests and manual checks for:
+
+- Task completion behavior (mark_complete updates completed and completed_at).
+- Pet task management (adding a task increases pet's task list).
+- Task ordering logic (organize_tasks sorts by priority and scheduled_time).
+- Basic scheduling run via main.py to validate end-to-end behavior.
+  These tests validated core invariants (state changes, ownership relationships, ordering) that the scheduler relies on.
+
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
 - What edge cases would you test next if you had more time?
+
+Confidence: Moderate for small, same day schedules and typical usage patterns. The current implementation handles most everyday cases but can fail in edge scenarios.
+
+Next tests / edge cases:
+
+- Tasks that span multiple availability windows.
+- Many small tasks that fragment windows and block higher-priority tasks.
+- Recurrence across changes and multi-day schedules.
+- Performance/stress tests with large numbers of tasks and windows.
+- Integration tests involving Streamlit session state persistence.
 
 ---
 
@@ -95,10 +139,22 @@ For larger or more complex scenarios, consider local-search improvements
 
 - What part of this project are you most satisfied with?
 
+I am most satisfied with the separation of concerns between data models and scheduler logic, clear dataclass definitions, Streamlit session_state integration for persistence, and having unit tests to validate critical behaviors.
+
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
 
+I would improve the following:
+
+- Switch ScheduledTask to full datetimes (start/end) and add timezone awareness.
+- Replace greedy algorithm with a hybrid heuristic or use local search / small ILP for better packing.
+- Add persistent storage (SQLite or simple JSON) and proper authentication with hashed passwords.
+- Expand test coverage and add property-based tests for schedule validity.
+- Improve UI to show task/schedule conflicts visually, add drag-and-drop task reordering, display reasoning for each scheduled task placement, and support multi-day schedule views.
+
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+
+I learned how to design iteratively using AI while always validating suggestions with tests, small manual runs, and testing the app incrementally to make sure that I am satisfied with the changes being made.

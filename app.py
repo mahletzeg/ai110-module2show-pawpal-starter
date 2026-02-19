@@ -6,41 +6,7 @@ st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
 st.title("🐾 PawPal+")
 
-st.markdown(
-    """
-Welcome to the PawPal+ starter app.
-
-This file is intentionally thin. It gives you a working Streamlit app so you can start quickly,
-but **it does not implement the project logic**. Your job is to design the system and build it.
-
-Use this app as your interactive demo once your backend classes/functions exist.
-"""
-)
-
-with st.expander("Scenario", expanded=True):
-    st.markdown(
-        """
-**PawPal+** is a pet care planning assistant. It helps a pet owner plan care tasks
-for their pet(s) based on constraints like time, priority, and preferences.
-
-You will design and implement the scheduling logic and connect it to this Streamlit UI.
-"""
-    )
-
-with st.expander("What you need to build", expanded=True):
-    st.markdown(
-        """
-At minimum, your system should:
-- Represent pet care tasks (what needs to happen, how long it takes, priority)
-- Represent the pet and the owner (basic info and preferences)
-- Build a plan/schedule for a day that chooses and orders tasks based on constraints
-- Explain the plan (why each task was chosen and when it happens)
-"""
-    )
-
-st.divider()
-
-st.subheader("Quick Demo Inputs (UI only)")
+st.subheader("Welcome to PawPal+")
 owner_name = st.text_input("Owner name", value="Jordan")
 pet_name = st.text_input("Pet name", value="Mochi")
 species = st.selectbox("Species", ["dog", "cat", "other"])
@@ -86,12 +52,26 @@ if st.button("Add task"):
     owner.add_task_to_pet(pet.pet_id, task)
     st.success(f"Added task to {pet.name}")
 
-# show current tasks across all pets
-all_tasks = owner.get_all_tasks()
+
+# Use Scheduler to organize and display tasks
+scheduler = Scheduler()
+all_tasks = scheduler.collect_tasks(owner, include_completed=True)
+
 if all_tasks:
-    st.write("Current tasks (across pets):")
-    rows = [{"pet": next((p.name for p in owner.pets if p.pet_id == t.pet_id), t.pet_id), "task": t.get_summary()} for t in all_tasks]
+    st.write("Current tasks (across pets, sorted):")
+    sorted_tasks = scheduler.organize_tasks(all_tasks)
+    rows = [
+        {
+            "pet": next((p.name for p in owner.pets if p.pet_id == t.pet_id), t.pet_id),
+            "task": t.get_summary(),
+            "scheduled": t.scheduled_time.strftime("%Y-%m-%d %H:%M") if t.scheduled_time else "unscheduled",
+            "priority": t.priority,
+            "completed": "✅" if t.completed else "❌"
+        }
+        for t in sorted_tasks
+    ]
     st.table(rows)
+    st.success(f"Showing {len(rows)} tasks, sorted by time and priority.")
 else:
     st.info("No tasks yet. Add one above.")
 
@@ -141,7 +121,6 @@ st.subheader("Build Schedule")
 st.caption("This button should call your scheduling logic once you implement it.")
 
 if st.button("Generate schedule"):
-    scheduler = Scheduler()
     plan = scheduler.schedule_tasks(owner, datetime.now())
     if not plan.scheduled_tasks:
         st.info("No tasks scheduled for the selected availability.")
@@ -158,3 +137,11 @@ if st.button("Generate schedule"):
                 "reason": stask.reasoning,
             })
         st.table(rows)
+        st.success(f"Scheduled {len(rows)} tasks for today.")
+
+        # Show conflict warnings if any
+        if plan.warnings:
+            for w in plan.warnings:
+                st.warning(w)
+        else:
+            st.success("No conflicts detected in the schedule.")

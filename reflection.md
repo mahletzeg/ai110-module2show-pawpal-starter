@@ -43,6 +43,22 @@ My design evolved during implementation. Here are the key changes:
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+Key Tradeoff (Greedy vs. Optimal):
+This scheduler uses a greedy left-to-right bin-packing approach: it processes
+tasks in priority order and places each into the first available time slot.
+This is O(n \* w) where n = tasks and w = availability windows, making it fast
+for typical daily schedules (5–20 tasks, 2–3 windows).
+
+Trade-off: Greedy placement may not find the globally optimal arrangement.
+For example, if a high-priority 30-min task arrives after two low-priority
+20-min tasks, the greedy approach places the low-priority tasks first, potentially
+blocking the high-priority task. An exact solver (ILP or branch-and-bound) would
+find the best overall assignment but would be too slow for interactive use.
+
+Recommendation: For small daily task sets (< 20 tasks), greedy is acceptable.
+For larger or more complex scenarios, consider local-search improvements
+(e.g., swapping adjacent tasks) or a more sophisticated heuristic.
+
 ---
 
 ## 3. AI Collaboration

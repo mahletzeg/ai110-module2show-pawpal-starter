@@ -22,6 +22,17 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## Smarter Scheduling
+
+The scheduler includes several intelligent features:
+
+- **Smart sorting**: Tasks are organized by scheduled time, priority (highest first), and creation order for predictable ordering
+- **Flexible filtering**: Collect tasks by pet, pet name (case-insensitive), or completion status
+- **Recurring tasks**: Daily and weekly tasks automatically reschedule on completion, generating a new occurrence for the next interval
+- **Conflict detection**: Pre-scheduling detection catches user-entered fixed-time conflicts; post-scheduling detection catches overlaps introduced by the scheduler
+- **Lightweight warnings**: Conflicts are returned as human-readable warnings instead of crashing, allowing the plan to complete while flagging issues for the user
+- **Optimized algorithm**: Conflict detection runs in O(n log n) time with early-exit logic, making it efficient even with many tasks
+
 ## Getting started
 
 ### Setup
